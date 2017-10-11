@@ -13,7 +13,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate{
 
     let locationManager = CLLocationManager();
     var started = false;
-    var timer : NSTimer!;
+    var timer : Timer!;
     var timeCall = 0;
     
     @IBOutlet weak var actionButton: UIButton!
@@ -22,12 +22,16 @@ class ViewController: UIViewController, CLLocationManagerDelegate{
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
-        locationManager.requestAlwaysAuthorization();
+        if #available(iOS 8.0, *) {
+            locationManager.requestAlwaysAuthorization()
+        } else {
+            // Fallback on earlier versions
+        };
         locationManager.delegate = self;
         //locationManager.pausesLocationUpdatesAutomatically = false; //打开此选项可以持续后台运行。关闭会导致一段时间后后台更新停止。
         
-        timer = NSTimer.scheduledTimerWithTimeInterval(5, target: self,
-            selector: "logout:", userInfo: nil, repeats: true);
+        timer = Timer.scheduledTimer(timeInterval: 5, target: self,
+                                     selector: #selector(logout(timer:)), userInfo: nil, repeats: true);
     }
 
     override func didReceiveMemoryWarning() {
@@ -36,27 +40,27 @@ class ViewController: UIViewController, CLLocationManagerDelegate{
     }
 
     @IBAction func actionPress(sender: AnyObject) {
-        
         if started == false{
             started = true;
-            actionButton.setTitle("结束", forState: .Normal);
+            actionButton.setTitle("结束", for: .normal);
             
             locationManager.startUpdatingLocation();
         }else{
             started = false;
-            actionButton.setTitle("开始", forState: .Normal);
+            actionButton.setTitle("开始", for: .normal);
             
             locationManager.stopUpdatingLocation();
         }
     }
 
-    func logout(timer : NSTimer) -> Void{
-        NSLog("It is %d call!", timeCall++);
+    @objc func logout(timer : Timer) -> Void{
+        NSLog("It is %d call!", timeCall);
+        timeCall += 1;
     }
     
     //MARK: CLLocationManagerDelegate
     
-    func locationManager(manager: CLLocationManager!, didUpdateLocations locations: [AnyObject]!) {
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         NSLog("did Update Locations");
     }
 }
